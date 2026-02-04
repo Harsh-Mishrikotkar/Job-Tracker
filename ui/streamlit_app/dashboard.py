@@ -37,8 +37,48 @@ def load_jobs():
     )
     conn.close()
     return df
+def load_run_stats():
+    conn = get_connection()
+    df = pd.read_sql_query(
+        """
+        SELECT
+            run_timestamp,
+            total_fetched,
+            total_matched,
+            total_rejected,
+            total_inserted
+        FROM runs
+        ORDER BY run_timestamp DESC
+        LIMIT 1
+        """,
+        conn
+    )
+    conn.close()
+    return df
 
 # UI 
+st.subheader("Latest Run Summary")
+
+try:
+    stats_df = load_run_stats()
+
+    if stats_df.empty:
+        st.info("No run statistics available yet.")
+    else:
+        stats = stats_df.iloc[0]
+
+        col1, col2, col3, col4 = st.columns(4)
+
+        col1.metric("Fetched", int(stats["total_fetched"]))
+        col2.metric("Matched", int(stats["total_matched"]))
+        col3.metric("Rejected", int(stats["total_rejected"]))
+        col4.metric("Inserted", int(stats["total_inserted"]))
+
+except Exception as e:
+    st.error("Failed to load run statistics.")
+    st.exception(e)
+
+
 if not DB_PATH.exists():
     st.error("Database not found. Run main.py first.")
     st.stop()

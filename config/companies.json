@@ -1,1 +1,7 @@
-[]
+[
+  {
+    "name": "Stripe",
+    "ats": "greenhouse",
+    "board_token": "stripe"
+  }
+]
